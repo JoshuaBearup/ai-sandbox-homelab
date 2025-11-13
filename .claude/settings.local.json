@@ -10,7 +10,14 @@
       "Bash(mkdir:*)",
       "Bash(docker --version:*)",
       "Bash(docker-compose:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(streamlit run:*)",
+      "Bash(timeout 5 bash:*)",
+      "Bash(python -m streamlit:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []
