@@ -19,7 +19,7 @@ Configuration:
     Server: Change DATABASE_URL to point to VM 100 (192.168.1.101:5432)
 """
 
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text, Float
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text, Float, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from contextlib import contextmanager
@@ -160,7 +160,7 @@ def init_database():
         # Verify connection
         with get_session() as session:
             # Simple query to test connection
-            result = session.execute("SELECT 1")
+            result = session.execute(text("SELECT 1"))
             logger.info("Database connection verified")
 
     except Exception as e:
@@ -184,7 +184,7 @@ def test_connection() -> bool:
     """
     try:
         with get_session() as session:
-            session.execute("SELECT 1")
+            session.execute(text("SELECT 1"))
         logger.info("Database connection test: SUCCESS")
         return True
     except Exception as e:

@@ -77,8 +77,7 @@ IF "%1"=="app1" (
     echo URL: http://localhost:8501
     echo Press Ctrl+C to stop
     echo.
-    cd streamlit_apps\app1
-    python -m streamlit run streamlit_main.py --server.address=localhost --server.headless=true
+    python -m streamlit run streamlit_apps/app1/streamlit_main.py --server.address=localhost --server.headless=true
     exit /b 0
 )
 

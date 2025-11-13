@@ -49,8 +49,8 @@ pip install psycopg2-binary --only-binary :all:
 ## Step 4: Run the App
 
 ```bash
-# From streamlit_apps/app1 directory
-python -m streamlit run streamlit_main.py --server.address=localhost --server.headless=true
+# From project root directory
+python -m streamlit run streamlit_apps/app1/streamlit_main.py --server.address=localhost --server.headless=true
 ```
 
 **Security Note**: The `--server.address=localhost` flag ensures the app is only accessible from your laptop (not publicly visible on your network).
