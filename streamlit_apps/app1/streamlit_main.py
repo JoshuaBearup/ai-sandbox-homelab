@@ -243,10 +243,26 @@ def show_ai_logs():
     # Fetch logs
     try:
         with get_session() as session:
-            logs = session.query(AIInteractionLogDB)\
+            log_objects = session.query(AIInteractionLogDB)\
                 .order_by(AIInteractionLogDB.timestamp.desc())\
                 .limit(50)\
                 .all()
+
+            # Convert to dictionaries while still in session
+            logs = []
+            for log in log_objects:
+                logs.append({
+                    'call_id': log.call_id,
+                    'timestamp': log.timestamp,
+                    'provider': log.provider,
+                    'model': log.model,
+                    'prompt': log.prompt,
+                    'response': log.response,
+                    'success': log.success,
+                    'error_message': log.error_message,
+                    'latency_ms': log.latency_ms,
+                    'environment': log.environment,
+                })
 
         if not logs:
             st.info("No AI interactions logged yet. Try the Q&A or Sentiment Analysis tabs!")
@@ -260,7 +276,7 @@ def show_ai_logs():
         with col1:
             filter_provider = st.selectbox(
                 "Provider",
-                ["All"] + list(set([log.provider for log in logs]))
+                ["All"] + list(set([log['provider'] for log in logs]))
             )
         with col2:
             filter_success = st.selectbox(
@@ -271,40 +287,40 @@ def show_ai_logs():
         # Filter logs
         filtered_logs = logs
         if filter_provider != "All":
-            filtered_logs = [log for log in filtered_logs if log.provider == filter_provider]
+            filtered_logs = [log for log in filtered_logs if log['provider'] == filter_provider]
         if filter_success == "Success":
-            filtered_logs = [log for log in filtered_logs if log.success]
+            filtered_logs = [log for log in filtered_logs if log['success']]
         elif filter_success == "Failed":
-            filtered_logs = [log for log in filtered_logs if not log.success]
+            filtered_logs = [log for log in filtered_logs if not log['success']]
 
         # Display logs
         for log in filtered_logs:
             with st.expander(
-                f"{log.timestamp.strftime('%Y-%m-%d %H:%M:%S')} - "
-                f"{log.provider}/{log.model} - "
-                f"{'✅ Success' if log.success else '❌ Failed'}"
+                f"{log['timestamp'].strftime('%Y-%m-%d %H:%M:%S')} - "
+                f"{log['provider']}/{log['model']} - "
+                f"{'✅ Success' if log['success'] else '❌ Failed'}"
             ):
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    st.markdown(f"**Call ID:** `{log.call_id}`")
-                    st.markdown(f"**Provider:** {log.provider}")
-                    st.markdown(f"**Model:** {log.model}")
-                    st.markdown(f"**Environment:** {log.environment}")
+                    st.markdown(f"**Call ID:** `{log['call_id']}`")
+                    st.markdown(f"**Provider:** {log['provider']}")
+                    st.markdown(f"**Model:** {log['model']}")
+                    st.markdown(f"**Environment:** {log['environment']}")
 
                 with col2:
-                    st.markdown(f"**Success:** {'Yes' if log.success else 'No'}")
-                    if log.latency_ms:
-                        st.markdown(f"**Latency:** {log.latency_ms}ms")
-                    if log.error_message:
-                        st.markdown(f"**Error:** {log.error_message}")
+                    st.markdown(f"**Success:** {'Yes' if log['success'] else 'No'}")
+                    if log['latency_ms']:
+                        st.markdown(f"**Latency:** {log['latency_ms']}ms")
+                    if log['error_message']:
+                        st.markdown(f"**Error:** {log['error_message']}")
 
                 st.markdown("**Prompt:**")
-                st.code(log.prompt, language="text")
+                st.code(log['prompt'], language="text")
 
-                if log.response:
+                if log['response']:
                     st.markdown("**Response:**")
-                    st.code(log.response, language="json")
+                    st.code(log['response'], language="json")
 
     except Exception as e:
         st.error(f"Failed to load logs: {e}")
