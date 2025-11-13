@@ -1,0 +1,19 @@
+# AI Sandbox - App2 (Project Coordinator) Dependencies
+# Python 3.12+
+
+# Web framework
+streamlit==1.31.0
+
+# Database
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+
+# Data validation and settings
+pydantic==2.6.1
+pydantic-settings==2.1.0
+
+# AI/LLM
+openai==1.12.0
+
+# Utilities
+python-dotenv==1.0.1

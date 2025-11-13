@@ -108,3 +108,33 @@ class AIGeneratedSummary(BaseModel):
     word_count_original: int = Field(..., description="Original text word count")
     word_count_summary: int = Field(..., description="Summary word count")
     compression_ratio: float = Field(..., ge=0, le=1, description="Summary length / original length")
+
+
+# App2: Project Coordinator Models
+
+class ProjectStatus(str, Enum):
+    """Project status enumeration."""
+    PLANNING = "planning"
+    ACTIVE = "active"
+    ON_HOLD = "on-hold"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class DocumentAnalysis(BaseModel):
+    """AI analysis of project documents."""
+    summary: str = Field(..., description="3-4 sentence summary of document content")
+    document_type: str = Field(..., description="contract, report, memo, invoice, etc.")
+    key_points: List[str] = Field(..., description="3-5 most important points from document")
+    action_items: List[str] = Field(default_factory=list, description="Any action items or tasks mentioned")
+    budget_impact: Optional[str] = Field(None, description="Any budget implications mentioned")
+    deadlines: List[str] = Field(default_factory=list, description="Any dates or deadlines mentioned")
+
+
+class ProjectBriefing(BaseModel):
+    """AI-generated daily briefing for project coordinator."""
+    urgent_items: List[str] = Field(..., description="Items needing immediate attention")
+    budget_alerts: List[str] = Field(..., description="Budget concerns or variances")
+    timeline_risks: List[str] = Field(..., description="Projects at risk of delay")
+    upcoming_deadlines: List[str] = Field(..., description="Important dates in next 7 days")
+    recommendations: List[str] = Field(..., description="Recommended actions for today")
