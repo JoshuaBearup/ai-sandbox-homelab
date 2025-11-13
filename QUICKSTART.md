@@ -2,6 +2,10 @@
 
 Get the AI Sandbox running on your laptop in 5 minutes!
 
+**Prefer simple commands?** Use the helper scripts: [DEV_SCRIPTS.md](DEV_SCRIPTS.md)
+
+---
+
 ## Prerequisites
 
 1. **Docker Desktop** - [Download here](https://www.docker.com/products/docker-desktop/)
@@ -46,10 +50,12 @@ pip install psycopg2-binary --only-binary :all:
 
 ```bash
 # From streamlit_apps/app1 directory
-streamlit run streamlit_main.py
+python -m streamlit run streamlit_main.py --server.address=localhost --server.headless=true
 ```
 
-Your browser will automatically open to http://localhost:8501
+**Security Note**: The `--server.address=localhost` flag ensures the app is only accessible from your laptop (not publicly visible on your network).
+
+Open your browser manually to http://localhost:8501
 
 ## What You'll See
 
