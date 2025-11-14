@@ -17,7 +17,8 @@
       "Bash(taskkill:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(tasklist:*)"
     ],
     "deny": [],
     "ask": []

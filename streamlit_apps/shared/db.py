@@ -19,13 +19,15 @@ Configuration:
     Server: Change DATABASE_URL to point to VM 100 (192.168.1.101:5432)
 """
 
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text, Float, text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text, Float, text, Numeric, Date, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, relationship
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Generator
 import logging
+import uuid
 
 from shared.config import get_config
 
@@ -57,6 +59,86 @@ class AIInteractionLogDB(Base):
     error_message = Column(Text, nullable=True)
     latency_ms = Column(Integer, nullable=True)
     environment = Column(String(20), nullable=False, index=True)
+
+
+# App2: Project Coordinator Models
+
+class ProjectDB(Base):
+    """
+    Database table for projects.
+    
+    Tracks project metadata, status, budget, timeline, and comprehensive structured data.
+    """
+    __tablename__ = "projects"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(200), nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    status = Column(String(50), nullable=False, default="planning", index=True)
+    budget_allocated = Column(Numeric(12, 2), nullable=True)
+    budget_spent = Column(Numeric(12, 2), nullable=True, default=0)
+    start_date = Column(Date, nullable=True)
+    expected_end_date = Column(Date, nullable=True, index=True)
+    actual_end_date = Column(Date, nullable=True)
+    priority_level = Column(Integer, nullable=True)  # 1-5 scale
+    department = Column(String(100), nullable=True)
+    project_manager = Column(String(100), nullable=True)
+    
+    # Structured project data (JSONB for flexible storage)
+    structured_data = Column(JSONB, nullable=True)
+    # Contains: objectives, success_criteria, stakeholders, milestones, 
+    # budget_breakdown, funding_source, risks, dependencies, activities, notes
+    
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    transactions = relationship("BudgetTransactionDB", back_populates="project", cascade="all, delete-orphan")
+    documents = relationship("ProjectDocumentDB", back_populates="project", cascade="all, delete-orphan")
+
+
+class BudgetTransactionDB(Base):
+    """
+    Database table for budget transactions.
+    
+    Tracks all expenses and budget adjustments for projects.
+    """
+    __tablename__ = "budget_transactions"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
+    transaction_date = Column(Date, nullable=False, index=True)
+    amount = Column(Numeric(10, 2), nullable=False)
+    category = Column(String(100), nullable=True)
+    vendor = Column(String(200), nullable=True)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    project = relationship("ProjectDB", back_populates="transactions")
+
+
+class ProjectDocumentDB(Base):
+    """
+    Database table for project documents.
+    
+    Stores document metadata and AI analysis results.
+    File content stored on filesystem, not in database.
+    """
+    __tablename__ = "project_documents"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
+    filename = Column(String(255), nullable=False)
+    document_type = Column(String(50), nullable=True)
+    file_path = Column(Text, nullable=False)
+    upload_date = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    ai_summary = Column(Text, nullable=True)
+    key_points = Column(JSONB, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    project = relationship("ProjectDB", back_populates="documents")
 
 
 # Database Engine and Session

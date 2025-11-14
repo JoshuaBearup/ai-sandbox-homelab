@@ -138,3 +138,110 @@ class ProjectBriefing(BaseModel):
     timeline_risks: List[str] = Field(..., description="Projects at risk of delay")
     upcoming_deadlines: List[str] = Field(..., description="Important dates in next 7 days")
     recommendations: List[str] = Field(..., description="Recommended actions for today")
+
+
+# Structured Project Component Models
+
+class RiskLevel(str, Enum):
+    """Risk likelihood/impact levels."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class RiskStatus(str, Enum):
+    """Risk management status."""
+    IDENTIFIED = "identified"
+    MITIGATING = "mitigating"
+    MONITORING = "monitoring"
+    CLOSED = "closed"
+
+
+class ActionStatus(str, Enum):
+    """Action item status."""
+    NOT_STARTED = "not-started"
+    IN_PROGRESS = "in-progress"
+    BLOCKED = "blocked"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class MilestoneStatus(str, Enum):
+    """Milestone status."""
+    UPCOMING = "upcoming"
+    IN_PROGRESS = "in-progress"
+    COMPLETED = "completed"
+    DELAYED = "delayed"
+    CANCELLED = "cancelled"
+
+
+class Risk(BaseModel):
+    """Structured risk with tracking."""
+    id: str = Field(..., description="Unique risk ID (e.g., R001)")
+    description: str = Field(..., description="Risk description")
+    likelihood: RiskLevel = Field(..., description="Probability of occurrence")
+    impact: RiskLevel = Field(..., description="Severity if it occurs")
+    mitigation: str = Field(..., description="Mitigation strategy")
+    owner: Optional[str] = Field(None, description="Person responsible for managing risk")
+    status: RiskStatus = Field(RiskStatus.IDENTIFIED, description="Current risk status")
+    identified_date: Optional[str] = Field(None, description="When risk was identified (YYYY-MM-DD)")
+    review_date: Optional[str] = Field(None, description="Next review date (YYYY-MM-DD)")
+
+
+class Action(BaseModel):
+    """Structured action item with tracking."""
+    id: str = Field(..., description="Unique action ID (e.g., A001)")
+    description: str = Field(..., description="Action description")
+    owner: str = Field(..., description="Person responsible")
+    due_date: Optional[str] = Field(None, description="Due date (YYYY-MM-DD)")
+    status: ActionStatus = Field(ActionStatus.NOT_STARTED, description="Current status")
+    priority: int = Field(3, ge=1, le=5, description="Priority level 1-5")
+    notes: Optional[str] = Field(None, description="Additional notes or updates")
+    completed_date: Optional[str] = Field(None, description="Completion date (YYYY-MM-DD)")
+
+
+class Milestone(BaseModel):
+    """Structured milestone with deliverables."""
+    id: str = Field(..., description="Unique milestone ID (e.g., M001)")
+    name: str = Field(..., description="Milestone name")
+    target_date: str = Field(..., description="Target completion date (YYYY-MM-DD)")
+    completion_date: Optional[str] = Field(None, description="Actual completion date (YYYY-MM-DD)")
+    status: MilestoneStatus = Field(MilestoneStatus.UPCOMING, description="Current status")
+    deliverables: List[str] = Field(default_factory=list, description="Expected deliverables")
+    dependencies: List[str] = Field(default_factory=list, description="Milestone IDs this depends on")
+    notes: Optional[str] = Field(None, description="Additional notes")
+
+
+class Stakeholder(BaseModel):
+    """Structured stakeholder with engagement tracking."""
+    id: str = Field(..., description="Unique stakeholder ID (e.g., S001)")
+    name: str = Field(..., description="Stakeholder name or organization")
+    role: str = Field(..., description="Role in project (e.g., Decision Maker, Consulted)")
+    interest: str = Field(..., description="High, Medium, Low")
+    influence: str = Field(..., description="High, Medium, Low")
+    engagement_strategy: Optional[str] = Field(None, description="How to engage this stakeholder")
+    contact: Optional[str] = Field(None, description="Contact information")
+    last_engaged: Optional[str] = Field(None, description="Last engagement date (YYYY-MM-DD)")
+
+
+class BudgetLine(BaseModel):
+    """Structured budget line item."""
+    id: str = Field(..., description="Unique budget line ID (e.g., B001)")
+    category: str = Field(..., description="Budget category")
+    allocated: float = Field(..., description="Allocated amount")
+    spent: float = Field(0.0, description="Amount spent so far")
+    notes: Optional[str] = Field(None, description="Notes about this budget line")
+
+
+class StructuredProjectData(BaseModel):
+    """Container for all structured project components."""
+    objectives: List[str] = Field(default_factory=list, description="Project objectives")
+    success_criteria: List[str] = Field(default_factory=list, description="Success criteria")
+    risks: List[Risk] = Field(default_factory=list, description="Risk register")
+    actions: List[Action] = Field(default_factory=list, description="Action items")
+    milestones: List[Milestone] = Field(default_factory=list, description="Project milestones")
+    stakeholders: List[Stakeholder] = Field(default_factory=list, description="Stakeholder register")
+    budget_lines: List[BudgetLine] = Field(default_factory=list, description="Budget breakdown")
+    dependencies: List[str] = Field(default_factory=list, description="External dependencies")
+    notes: Optional[str] = Field(None, description="Additional project notes")
